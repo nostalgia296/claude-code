@@ -83,6 +83,10 @@ function loadModule(): AudioCaptureNapi | null {
   const binaryRel = `audio-capture/${platformDir}/audio-capture.node`
   const vendorRoot = getVendorRoot()
   const fallbacks = [
+    // Bun standalone executable (`bun build --compile`): getVendorRoot() can't
+    // see a real dist/ (import.meta.url points into $bunfs), so resolve the
+    // sidecar addon next to the running executable: <exeDir>/vendor/...
+    resolve(dirname(process.execPath), 'vendor', binaryRel),
     resolve(vendorRoot, binaryRel),
     `./vendor/${binaryRel}`,
     `../vendor/${binaryRel}`,

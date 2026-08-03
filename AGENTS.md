@@ -42,6 +42,9 @@ bun run build
 # Build with Vite (alternative build pipeline)
 bun run build:vite
 
+# Build standalone native executable (bun --compile) → dist-native/ claude-code
+bun run build:binary    # same as build:native
+
 # Test
 bun test                                    # run all tests
 bun test src/utils/__tests__/hash.test.ts   # run single file

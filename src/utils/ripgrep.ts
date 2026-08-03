@@ -5,7 +5,6 @@ import memoize from 'lodash-es/memoize.js'
 import { homedir } from 'os'
 import * as path from 'path'
 import { logEvent } from 'src/services/analytics/index.js'
-import { isInBundledMode } from './bundledMode.js'
 import { logForDebugging } from './debug.js'
 import { distRoot } from './distRoot.js'
 import { isEnvDefinedFalsy } from './envUtils.js'
@@ -44,16 +43,11 @@ export const getRipgrepConfig = memoize((): RipgrepConfig => {
     }
   }
 
-  // In bundled (native) mode, ripgrep is statically compiled into bun-internal
-  // and dispatches based on argv[0]. We spawn ourselves with argv0='rg'.
-  if (isInBundledMode()) {
-    return {
-      mode: 'embedded',
-      command: process.execPath,
-      args: ['--no-config'],
-      argv0: 'rg',
-    }
-  }
+  // In bundled (native) mode, `distRoot` resolves to the executable's own
+  // directory (see distRoot.ts), so the sidecar rg under
+  // `<exeDir>/vendor/ripgrep/...` is picked up by the common resolution below.
+  // If the sidecar is missing, we fall back to a system `rg` or surface a
+  // clear "no ripgrep" note instead of pretending it was embedded.
 
   const rgRoot = path.resolve(__dirname, 'vendor', 'ripgrep')
   const command =
